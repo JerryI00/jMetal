@@ -103,7 +103,7 @@ public abstract class GenericMultipleGeneGrnFromMad extends AbstractDoubleProble
 
 		//create model using parameters encoded in individual
 		//Variable[] decisionVariables  = solution.getDecisionVariables();
-		double[] parametersArray = new double[getNumberOfObjectives()] ;
+		double[] parametersArray = new double[getNumberOfVariables()] ;
 
 		for (int i = 0 ; i < solution.getNumberOfVariables(); i++)
 			parametersArray[i] = solution.getVariableValue(i) ;
@@ -132,7 +132,7 @@ public abstract class GenericMultipleGeneGrnFromMad extends AbstractDoubleProble
 			fitness[0] = Double.MAX_VALUE / 2;
 		solution.setObjective(0, fitness[0]);
 		solution.setObjective(1, fitness[1]);
-	}//evaluate
+	}
 	
 	
 	/**

@@ -52,7 +52,7 @@ public class MOEADRunner extends AbstractAlgorithmRunner {
     if (args.length == 1) {
       problem = new Tominaga99FromMA(2,args[0]) ; // args[0] File Name and pah
     } else {
-      problem = new Tominaga99FromMA(2) ;
+      problem = new Tominaga99FromMA(2);
     }
 
     double cr = 1.0 ;
@@ -66,9 +66,9 @@ public class MOEADRunner extends AbstractAlgorithmRunner {
     algorithm = new MOEADBuilder(problem, MOEADBuilder.Variant.MOEAD)
         .setCrossover(crossover)
         .setMutation(mutation)
-        .setMaxEvaluations(150000)
-        .setPopulationSize(300)
-        .setResultPopulationSize(300)
+        .setMaxEvaluations(60000)
+        .setPopulationSize(100)
+        .setResultPopulationSize(100)
         .setNeighborhoodSelectionProbability(0.9)
         .setMaximumNumberOfReplacedSolutions(2)
         .setNeighborSize(20)

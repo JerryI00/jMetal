@@ -27,9 +27,10 @@ public class CompleteSumOfSquaredProcentualErrors extends CompleteGeneModelEvalu
                     //    experimental_data = 1e-05;
                     if ((this.mad.getMad().get(k).get(i).get(j)!=0.0) && (difference.get(i).get(j)!=0.0)) {
                         result = result + Math.pow((difference.get(i).get(j) / this.mad.getMad().get(k).get(i).get(j)), 2);
-                        System.out.println("RESULTS : " + result + " DIFF : " + difference.get(i).get(j) + " GETMAD " + this.mad.getMad().get(k).get(i).get(j) + " SOL " + simulatedData.get(k).get(i).get(j));
-                        System.out.print(this.mad.getMad().get(k).get(i).get(j) + " ");
-                        System.out.print(simulatedData.get(k).get(i).get(j) + " ");
+                        //System.out.println("RESULTS : " + result + " DIFF : " + difference.get(i).get(j) + " GETMAD
+                      // " + this.mad.getMad().get(k).get(i).get(j) + " SOL " + simulatedData.get(k).get(i).get(j));
+                        //System.out.print(this.mad.getMad().get(k).get(i).get(j) + " ");
+                        //System.out.print(simulatedData.get(k).get(i).get(j) + " ");
                     }
 
                 }
