@@ -62,6 +62,9 @@ public abstract class GenericMultipleGeneGrnFromMad extends AbstractDoubleProble
 			lowerLimit.add(-1.0);
 			upperLimit.add(+1.0);
 		}
+
+    setLowerLimit(lowerLimit);
+    setUpperLimit(upperLimit);
 	}
 
 	/**
@@ -102,7 +105,7 @@ public abstract class GenericMultipleGeneGrnFromMad extends AbstractDoubleProble
 		//Variable[] decisionVariables  = solution.getDecisionVariables();
 		double[] parametersArray = new double[getNumberOfObjectives()] ;
 
-		for (int i = 0 ; i < solution.getNumberOfObjectives(); i++)
+		for (int i = 0 ; i < solution.getNumberOfVariables(); i++)
 			parametersArray[i] = solution.getVariableValue(i) ;
 
 		ArrayList<ArrayList<Double>> parameters = new ArrayList<ArrayList<Double>>();

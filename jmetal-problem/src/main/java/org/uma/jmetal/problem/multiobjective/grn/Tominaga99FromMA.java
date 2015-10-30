@@ -76,6 +76,9 @@ public class Tominaga99FromMA extends AbstractDoubleProblem {
       lowerLimit.add(paramsRange_[i][0]);
       upperLimit.add(paramsRange_[i][1]);
     }
+
+    setLowerLimit(lowerLimit);
+    setUpperLimit(upperLimit);
   }
 
   /**

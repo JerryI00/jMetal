@@ -80,9 +80,12 @@ public class MicroarrayData implements Serializable{
 
 	public void initMadFromFile() {
 		try {
+			InputStream in = getClass().getResourceAsStream("/" + madFileName);
+			InputStreamReader isr = new InputStreamReader(in);
+			BufferedReader madFile = new BufferedReader(isr);
 
-			BufferedReader madFile = new BufferedReader(new FileReader(
-					madFileName));
+			//BufferedReader madFile = new BufferedReader(new FileReader(
+			//		madFileName));
 			String line = madFile.readLine();//line 1: gene count and number of timeSeries
 			String[] splitLine = line.split(" ");
 			int genes = Integer.parseInt(splitLine[0]);
