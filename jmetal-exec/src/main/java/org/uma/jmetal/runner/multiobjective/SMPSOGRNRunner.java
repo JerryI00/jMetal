@@ -64,15 +64,11 @@ public class SMPSOGRNRunner extends AbstractAlgorithmRunner {
     String problemName ;
     if (args.length == 1) {
       problemName = args[0];
-    } else if (args.length == 2) {
-      problemName = args[0] ;
-      referenceParetoFront = args[1] ;
+      problem = new Tominaga99FromMA(2,args[0]) ;
     } else {
-      problemName = "org.uma.jmetal.problem.multiobjective.zdt.ZDT4";
-      //referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/ZDT4.pf" ;
+      problem = new Tominaga99FromMA(2) ;
     }
 
-    problem = new Tominaga99FromMA(2) ;
     BoundedArchive<DoubleSolution> archive = new CrowdingDistanceArchive<DoubleSolution>(100) ;
 
     double mutationProbability = 1.0 / problem.getNumberOfVariables() ;
@@ -81,7 +77,7 @@ public class SMPSOGRNRunner extends AbstractAlgorithmRunner {
 
     algorithm = new SMPSOBuilder(problem, archive)
         .setMutation(mutation)
-        .setMaxIterations(250)
+        .setMaxIterations(500)
         .setSwarmSize(100)
         .setRandomGenerator(new MersenneTwisterGenerator())
         .setSolutionListEvaluator(new SequentialSolutionListEvaluator<DoubleSolution>())
