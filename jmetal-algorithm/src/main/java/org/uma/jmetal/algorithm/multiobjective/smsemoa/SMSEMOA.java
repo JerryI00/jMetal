@@ -20,19 +20,10 @@ import org.uma.jmetal.operator.SelectionOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.qualityindicator.impl.Hypervolume;
 import org.uma.jmetal.solution.Solution;
-import org.uma.jmetal.util.comparator.HypervolumeContributorComparator;
-import org.uma.jmetal.util.front.Front;
-import org.uma.jmetal.util.front.imp.ArrayFront;
-import org.uma.jmetal.util.front.util.FrontNormalizer;
-import org.uma.jmetal.util.front.util.FrontUtils;
-import org.uma.jmetal.util.point.Point;
 import org.uma.jmetal.util.solutionattribute.Ranking;
 import org.uma.jmetal.util.solutionattribute.impl.DominanceRanking;
-import org.uma.jmetal.util.solutionattribute.impl.HypervolumeContribution;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -40,25 +31,21 @@ import java.util.List;
  */
 public class SMSEMOA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, List<S>> {
   protected final int maxEvaluations;
-  protected final int populationSize;
   protected final double offset ;
-
-  protected final Problem<S> problem;
 
   protected int evaluations;
 
-  private Hypervolume<?> hypervolume;
+  private Hypervolume<S> hypervolume;
 
   /**
    * Constructor
    */
   public SMSEMOA(Problem<S> problem, int maxEvaluations, int populationSize, double offset,
       CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
-      SelectionOperator<List<S>, S> selectionOperator) {
-    super() ;
-    this.problem = problem;
+      SelectionOperator<List<S>, S> selectionOperator, Hypervolume<S> hypervolumeImplementation) {
+    super(problem) ;
     this.maxEvaluations = maxEvaluations;
-    this.populationSize = populationSize;
+    setMaxPopulationSize(populationSize);
 
     this.offset = offset ;
 
@@ -66,11 +53,11 @@ public class SMSEMOA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
     this.mutationOperator = mutationOperator;
     this.selectionOperator = selectionOperator;
 
-    hypervolume = new Hypervolume<>() ;
+    this.hypervolume = hypervolumeImplementation ;
   }
 
   @Override protected void initProgress() {
-    evaluations = populationSize ;
+    evaluations = getMaxPopulationSize() ;
   }
 
   @Override protected void updateProgress() {
@@ -81,18 +68,9 @@ public class SMSEMOA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
     return evaluations >= maxEvaluations ;
   }
 
-  @Override protected List<S> createInitialPopulation() {
-    List<S> population = new ArrayList<>(populationSize);
-    for (int i = 0; i < populationSize; i++) {
-      S newIndividual = problem.createSolution();
-      population.add(newIndividual);
-    }
-    return population;
-  }
-
   @Override protected List<S> evaluatePopulation(List<S> population) {
     for (S solution : population) {
-      problem.evaluate(solution);
+      getProblem().evaluate(solution);
     }
     return population ;
   }
@@ -130,7 +108,7 @@ public class SMSEMOA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
     Ranking<S> ranking = computeRanking(jointPopulation);
     List<S> lastSubfront = ranking.getSubfront(ranking.getNumberOfSubfronts()-1) ;
 
-    lastSubfront = computeHypervolumeContribution(lastSubfront, jointPopulation) ;
+    lastSubfront = hypervolume.computeHypervolumeContribution(lastSubfront, jointPopulation) ;
 
     List<S> resultPopulation = new ArrayList<>() ;
     for (int i = 0; i < ranking.getNumberOfSubfronts()-1; i++) {
@@ -157,79 +135,11 @@ public class SMSEMOA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
     return ranking;
   }
 
-  private List<S> computeHypervolumeContribution(List<S> lastFront, List<S> solutionList) {
-    if (lastFront.size() > 1) {
-      Front subFront = new ArrayFront((lastFront)) ;
-      Front front = new ArrayFront(solutionList) ;
-
-      // STEP 1. Obtain the maximum and minimum values of the Pareto front
-      double[] maximumValues = FrontUtils.getMaximumValues(front) ;
-      double[] minimumValues = FrontUtils.getMinimumValues(front) ;
-
-      // STEP 2. Get the normalized front
-      FrontNormalizer frontNormalizer = new FrontNormalizer(minimumValues, maximumValues) ;
-      Front normalizedFront = frontNormalizer.normalize(subFront) ;
-
-      // compute offsets for reference point in normalized space
-      double[] offsets = new double[maximumValues.length];
-      for (int i = 0; i < maximumValues.length; i++) {
-        offsets[i] = offset / (maximumValues[i] - minimumValues[i]);
-      }
-      // STEP 3. Inverse the pareto front. This is needed because the original
-      // metric by Zitzler is for maximization problem
-      Front invertedFront = FrontUtils.getInvertedFront(normalizedFront);
-
-      // shift away from origin, so that boundary points also get a contribution > 0
-      for (int i = 0; i < invertedFront.getNumberOfPoints(); i++) {
-        Point point = invertedFront.getPoint(i) ;
-
-        for (int j = 0; j < point.getNumberOfDimensions(); j++) {
-          point.setDimensionValue(j, point.getDimensionValue(j)+ offsets[j]);
-        }
-      }
-
-      HypervolumeContribution<S> hvContribution = new HypervolumeContribution<S>() ;
-
-      // calculate contributions and sort
-      double[] contributions = hvContributions(FrontUtils.convertFrontToArray(invertedFront));
-      for (int i = 0; i < contributions.length; i++) {
-        hvContribution.setAttribute(lastFront.get(i), contributions[i]);
-      }
-
-      Collections.sort(lastFront, new HypervolumeContributorComparator());
-      //      lastFront.sort(new HypervolumeContributorComparator());
-
-    }
-    return lastFront ;
+  @Override public String getName() {
+    return "SMSEMOA" ;
   }
 
-  /**
-   * Calculates how much hypervolume each point dominates exclusively. The points
-   * have to be transformed beforehand, to accommodate the assumptions of Zitzler's
-   * hypervolume code.
-   *
-   * @param front transformed objective values
-   * @return HV contributions
-   */
-  private double[] hvContributions(double[][] front) {
-    int numberOfObjectives = problem.getNumberOfObjectives();
-    double[] contributions = new double[front.length];
-    double[][] frontSubset = new double[front.length - 1][front[0].length];
-    LinkedList<double[]> frontCopy = new LinkedList<double[]>();
-    Collections.addAll(frontCopy, front);
-    double[][] totalFront = frontCopy.toArray(frontSubset);
-    double totalVolume =
-        hypervolume.calculateHypervolume(totalFront, totalFront.length, numberOfObjectives);
-    for (int i = 0; i < front.length; i++) {
-      double[] evaluatedPoint = frontCopy.remove(i);
-      frontSubset = frontCopy.toArray(frontSubset);
-      // STEP4. The hypervolume (control is passed to java version of Zitzler code)
-      double hv = hypervolume.calculateHypervolume(frontSubset, frontSubset.length, numberOfObjectives);
-      double contribution = totalVolume - hv;
-      contributions[i] = contribution;
-      // put point back
-      frontCopy.add(i, evaluatedPoint);
-    }
-    return contributions;
+  @Override public String getDescription() {
+    return "S metric selection EMOA" ;
   }
 }

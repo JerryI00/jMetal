@@ -17,7 +17,14 @@ import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.point.Point;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * Class representing a point (i.e, an array of double values)
@@ -25,7 +32,15 @@ import java.util.Arrays;
  * @author Antonio J. Nebro
  */
 public class ArrayPoint implements Point {
-  private double[] point;
+  protected double[] point;
+
+
+  /**
+   * Default constructor
+   */
+  public ArrayPoint() {
+    point = null ;
+  }
 
   /**
    * Constructor
@@ -39,7 +54,6 @@ public class ArrayPoint implements Point {
       point[i] = 0.0;
     }
   }
-
 
   /**
    * Copy constructor
@@ -88,6 +102,35 @@ public class ArrayPoint implements Point {
 
     this.point = new double[point.length];
     System.arraycopy(point, 0, this.point, 0, point.length);
+  }
+
+  /**
+   * Constructor reading the values from a file
+   * @param fileName
+   */
+  public ArrayPoint(String fileName) throws IOException {
+    FileInputStream fis = new FileInputStream(fileName);
+    InputStreamReader isr = new InputStreamReader(fis);
+    BufferedReader br = new BufferedReader(isr);
+
+    List<Double> auxiliarPoint = new ArrayList<Double>();
+    String aux = br.readLine();
+    while (aux != null) {
+      StringTokenizer st = new StringTokenizer(aux);
+
+      while (st.hasMoreTokens()) {
+        Double value = (new Double(st.nextToken()));
+        auxiliarPoint.add(value);
+      }
+      aux = br.readLine();
+    }
+
+    point = new double[auxiliarPoint.size()] ;
+    for (int i = 0; i < auxiliarPoint.size(); i++) {
+      point[i] = auxiliarPoint.get(i) ;
+    }
+
+    br.close();
   }
 
   @Override

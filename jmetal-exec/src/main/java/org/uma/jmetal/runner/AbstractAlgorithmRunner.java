@@ -1,10 +1,11 @@
 package org.uma.jmetal.runner;
 
 import org.uma.jmetal.qualityindicator.impl.*;
+import org.uma.jmetal.qualityindicator.impl.hypervolume.PISAHypervolume;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.JMetalLogger;
-import org.uma.jmetal.util.fileoutput.SolutionSetOutput;
+import org.uma.jmetal.util.fileoutput.SolutionListOutput;
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 import org.uma.jmetal.util.front.Front;
 import org.uma.jmetal.util.front.imp.ArrayFront;
@@ -27,7 +28,7 @@ public abstract class AbstractAlgorithmRunner {
    */
   public static void printFinalSolutionSet(List<? extends Solution<?>> population) {
 
-    new SolutionSetOutput.Printer(population)
+    new SolutionListOutput(population)
         .setSeparator("\t")
         .setVarFileOutputContext(new DefaultFileOutputContext("VAR.tsv"))
         .setFunFileOutputContext(new DefaultFileOutputContext("FUN.tsv"))
@@ -44,6 +45,7 @@ public abstract class AbstractAlgorithmRunner {
    * @param paretoFrontFile
    * @throws FileNotFoundException
    */
+  @SuppressWarnings("unchecked")
   public static void printQualityIndicators(List<? extends Solution<?>> population, String paretoFrontFile)
       throws FileNotFoundException {
     Front referenceFront = new ArrayFront(paretoFrontFile);
@@ -56,35 +58,34 @@ public abstract class AbstractAlgorithmRunner {
 
     String outputString = "\n" ;
     outputString += "Hypervolume (N) : " +
-        new Hypervolume<List<? extends Solution<?>>>(normalizedReferenceFront).evaluate(
-            normalizedPopulation) + "\n";
+        new PISAHypervolume<DoubleSolution>(normalizedReferenceFront).evaluate(normalizedPopulation) + "\n";
     outputString += "Hypervolume     : " +
-        new Hypervolume<List<? extends Solution<?>>>(referenceFront).evaluate(population) + "\n";
+        new PISAHypervolume(referenceFront).evaluate(population) + "\n";
     outputString += "Epsilon (N)     : " +
-        new Epsilon<List<? extends Solution<?>>>(normalizedReferenceFront).evaluate(normalizedPopulation) +
+        new Epsilon<DoubleSolution>(normalizedReferenceFront).evaluate(normalizedPopulation) +
         "\n" ;
     outputString += "Epsilon         : " +
-        new Epsilon<List<? extends Solution<?>>>(referenceFront).evaluate(population) + "\n" ;
+        new Epsilon(referenceFront).evaluate(population) + "\n" ;
     outputString += "GD (N)          : " +
-        new GenerationalDistance<List<? extends Solution<?>>>(normalizedReferenceFront).evaluate(normalizedPopulation) + "\n";
+        new GenerationalDistance<DoubleSolution>(normalizedReferenceFront).evaluate(normalizedPopulation) + "\n";
     outputString += "GD              : " +
-        new GenerationalDistance<List<? extends Solution<?>>>(referenceFront).evaluate(population) + "\n";
+        new GenerationalDistance(referenceFront).evaluate(population) + "\n";
     outputString += "IGD (N)         : " +
-        new InvertedGenerationalDistance<List<? extends Solution<?>>>(normalizedReferenceFront).evaluate(normalizedPopulation) + "\n";
+        new InvertedGenerationalDistance<DoubleSolution>(normalizedReferenceFront).evaluate(normalizedPopulation) + "\n";
     outputString +="IGD             : " +
-        new InvertedGenerationalDistance<List<? extends Solution<?>>>(referenceFront).evaluate(population) + "\n";
+        new InvertedGenerationalDistance(referenceFront).evaluate(population) + "\n";
     outputString += "IGD+ (N)        : " +
-        new InvertedGenerationalDistancePlus<List<? extends Solution<?>>>(normalizedReferenceFront).evaluate(normalizedPopulation) + "\n";
+        new InvertedGenerationalDistancePlus<DoubleSolution>(normalizedReferenceFront).evaluate(normalizedPopulation) + "\n";
     outputString += "IGD+            : " +
-        new InvertedGenerationalDistancePlus<List<? extends Solution<?>>>(referenceFront).evaluate(population) + "\n";
+        new InvertedGenerationalDistancePlus(referenceFront).evaluate(population) + "\n";
     outputString += "Spread (N)      : " +
-        new Spread<List<? extends Solution<?>>>(normalizedReferenceFront).evaluate(normalizedPopulation) + "\n";
+        new Spread<DoubleSolution>(normalizedReferenceFront).evaluate(normalizedPopulation) + "\n";
     outputString += "Spread          : " +
-        new Spread<List<? extends Solution<?>>>(referenceFront).evaluate(population) + "\n";
-    outputString += "R2 (N)          : " +
-        new R2<List<DoubleSolution>>(normalizedReferenceFront).evaluate(normalizedPopulation) + "\n";
-    outputString += "R2              : " +
-        new R2<List<? extends Solution<?>>>(referenceFront).evaluate(population) + "\n";
+        new Spread(referenceFront).evaluate(population) + "\n";
+//    outputString += "R2 (N)          : " +
+//        new R2<List<DoubleSolution>>(normalizedReferenceFront).evaluate(normalizedPopulation) + "\n";
+//    outputString += "R2              : " +
+//        new R2<List<? extends Solution<?>>>(referenceFront).evaluate(population) + "\n";
     outputString += "Error ratio     : " +
         new ErrorRatio<List<? extends Solution<?>>>(referenceFront).evaluate(population) + "\n";
     

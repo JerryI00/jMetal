@@ -1,10 +1,10 @@
 package org.uma.jmetal.algorithm.multiobjective.mombi.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.JMetalException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Juan J. Durillo
@@ -16,6 +16,18 @@ public class ASFUtilityFunctionSet<S extends Solution<?>> extends AbstractUtilit
 
 	private final List<Double> referencePoint; 
 	private Normalizer normalizer = null;
+	
+	public ASFUtilityFunctionSet(double [][] weights, List<Double> referencePoint) {
+		super(weights);
+		this.referencePoint = referencePoint;
+	}
+	
+	public ASFUtilityFunctionSet(double [][] weights) {
+		super(weights);
+		this.referencePoint = new ArrayList<>(this.getVectorSize());
+		for (int i = 0; i < this.getVectorSize(); i++)
+			this.referencePoint.add(0.0);
+	}
 	
 	public ASFUtilityFunctionSet(String file_path, List<Double> referencePoint) {
 		super(file_path);

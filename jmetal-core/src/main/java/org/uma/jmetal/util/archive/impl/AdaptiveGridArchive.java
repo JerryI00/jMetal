@@ -29,7 +29,7 @@ import java.util.Iterator;
 public class AdaptiveGridArchive<S extends Solution<?>> extends AbstractBoundedArchive<S> {
 
   private AdaptiveGrid<S> grid;
- 
+
   private Comparator<S> dominanceComparator;
 
   /**
@@ -58,6 +58,7 @@ public class AdaptiveGridArchive<S extends Solution<?>> extends AbstractBoundedA
    * @return true if the <code>Solution</code> has been inserted, false
    * otherwise.
    */
+  @Override
   public boolean add(S solution) {
     //Iterator of individuals over the list
     Iterator<S> iterator = getSolutionList().iterator();
@@ -119,17 +120,27 @@ public class AdaptiveGridArchive<S extends Solution<?>> extends AbstractBoundedA
   }
   
   public void prune() {
-	  Iterator<S> iterator = getSolutionList().iterator();
-      boolean removed = false;
-      while (iterator.hasNext()) {
-        if (!removed) {
-          S element = iterator.next();
-          int location2 = grid.location(element);
-          if (location2 == grid.getMostPopulatedHypercube()) {
-            iterator.remove();
-            grid.removeSolution(location2);
-          }
+    Iterator<S> iterator = getSolutionList().iterator();
+    boolean removed = false;
+    while (iterator.hasNext()) {
+      if (!removed) {
+        S element = iterator.next();
+        int location2 = grid.location(element);
+        if (location2 == grid.getMostPopulatedHypercube()) {
+          iterator.remove();
+          grid.removeSolution(location2);
         }
       }
+    }
+  }
+
+  @Override
+  public Comparator<S> getComparator() {
+    return null ; // TODO
+  }
+
+  @Override
+  public void computeDensityEstimator() {
+    // TODO
   }
 }

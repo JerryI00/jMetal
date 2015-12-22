@@ -13,14 +13,12 @@
 
 package org.uma.jmetal.qualityindicator.impl;
 
-import org.uma.jmetal.qualityindicator.QualityIndicator;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.front.Front;
 import org.uma.jmetal.util.front.imp.ArrayFront;
 import org.uma.jmetal.util.front.util.FrontUtils;
-import org.uma.jmetal.util.naming.impl.SimpleDescribedEntity;
-import org.uma.jmetal.util.point.util.DominanceDistance;
+import org.uma.jmetal.util.point.util.distance.DominanceDistance;
 
 import java.io.FileNotFoundException;
 import java.util.List;
@@ -32,26 +30,21 @@ import java.util.List;
  *
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
-public class InvertedGenerationalDistancePlus<Evaluate extends List<? extends Solution<?>>>
-    extends SimpleDescribedEntity
-    implements QualityIndicator<Evaluate,Double> {
+public class InvertedGenerationalDistancePlus<S extends Solution<?>> extends GenericIndicator<S> {
 
-  private Front referenceParetoFront ;
+  /**
+   * Default constructor
+   */
+  public InvertedGenerationalDistancePlus() {
+  }
 
   /**
    * Constructor
    *
    * @param referenceParetoFrontFile
-   * @throws FileNotFoundException
    */
   public InvertedGenerationalDistancePlus(String referenceParetoFrontFile) throws FileNotFoundException {
-    super("IGD+", "Inverted generational distance plus") ;
-    if (referenceParetoFrontFile == null) {
-      throw new JMetalException("The pareto front approximation is null");
-    }
-
-    Front front = new ArrayFront(referenceParetoFrontFile);
-    referenceParetoFront = front ;
+    super(referenceParetoFrontFile) ;
   }
 
   /**
@@ -61,12 +54,7 @@ public class InvertedGenerationalDistancePlus<Evaluate extends List<? extends So
    * @throws FileNotFoundException
    */
   public InvertedGenerationalDistancePlus(Front referenceParetoFront) {
-    super("IGD+", "Inverted generational distance plus") ;
-    if (referenceParetoFront == null) {
-      throw new JMetalException("The pareto front approximation is null");
-    }
-
-    this.referenceParetoFront = referenceParetoFront ;
+    super(referenceParetoFront) ;
   }
 
   /**
@@ -74,7 +62,7 @@ public class InvertedGenerationalDistancePlus<Evaluate extends List<? extends So
    * @param solutionList
    * @return
    */
-  @Override public Double evaluate(Evaluate solutionList) {
+  @Override public Double evaluate(List<S> solutionList) {
     if (solutionList == null) {
       throw new JMetalException("The pareto front approximation is null") ;
     }
@@ -92,16 +80,19 @@ public class InvertedGenerationalDistancePlus<Evaluate extends List<? extends So
 
     double sum = 0.0;
     for (int i = 0 ; i < referenceFront.getNumberOfPoints(); i++) {
-        sum += FrontUtils.distanceToClosestPoint(referenceFront.getPoint(i),
-            front, new DominanceDistance());
+      sum += FrontUtils.distanceToClosestPoint(referenceFront.getPoint(i),
+          front, new DominanceDistance());
     }
 
     // STEP 4. Divide the sum by the maximum number of points of the reference Pareto front
     return sum / referenceFront.getNumberOfPoints();
   }
 
-  @Override
-  public String getName() {
-    return super.getName();
+  @Override public String getName() {
+    return "IGD+" ;
+  }
+
+  @Override public String getDescription() {
+    return "Inverted generational distance quality indicator plus" ;
   }
 }

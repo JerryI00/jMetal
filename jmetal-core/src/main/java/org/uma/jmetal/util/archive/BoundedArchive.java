@@ -14,6 +14,8 @@ package org.uma.jmetal.util.archive;
 
 import org.uma.jmetal.solution.Solution;
 
+import java.util.Comparator;
+
 /**
  * Interface representing a bounded archive of solutions
  *
@@ -21,4 +23,6 @@ import org.uma.jmetal.solution.Solution;
  */
 public interface BoundedArchive<S extends Solution<?>> extends Archive<S> {
   public int getMaxSize() ;
+  public Comparator<S> getComparator() ;
+  public void computeDensityEstimator() ;
 }

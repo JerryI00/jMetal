@@ -21,13 +21,11 @@
 
 package org.uma.jmetal.qualityindicator.impl;
 
-import org.uma.jmetal.qualityindicator.QualityIndicator;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.front.Front;
 import org.uma.jmetal.util.front.imp.ArrayFront;
 import org.uma.jmetal.util.front.util.FrontUtils;
-import org.uma.jmetal.util.naming.impl.SimpleDescribedEntity;
 
 import java.io.FileNotFoundException;
 import java.util.List;
@@ -42,12 +40,14 @@ import java.util.List;
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  * @author Juan J. Durillo
  */
-public class GenerationalDistance<Evaluate extends List<? extends Solution<?>>>
-    extends SimpleDescribedEntity
-    implements QualityIndicator<Evaluate,Double> {
+public class GenerationalDistance<S extends Solution<?>> extends GenericIndicator<S> {
   private double pow = 2.0;
 
-  private Front referenceParetoFront ;
+  /**
+   * Default constructor
+   */
+  public GenerationalDistance() {
+  }
 
   /**
    * Constructor
@@ -57,13 +57,7 @@ public class GenerationalDistance<Evaluate extends List<? extends Solution<?>>>
    * @throws FileNotFoundException
    */
   public GenerationalDistance(String referenceParetoFrontFile, double p) throws FileNotFoundException {
-    super("GD", "Generational distance quality indicator") ;
-    if (referenceParetoFrontFile == null) {
-      throw new JMetalException("The pareto front object is null");
-    }
-
-    Front front = new ArrayFront(referenceParetoFrontFile);
-    referenceParetoFront = front ;
+    super(referenceParetoFrontFile) ;
     pow = p ;
   }
 
@@ -83,12 +77,7 @@ public class GenerationalDistance<Evaluate extends List<? extends Solution<?>>>
    * @param referenceParetoFront
    */
   public GenerationalDistance(Front referenceParetoFront) {
-    super("GD", "Generational distance quality indicator") ;
-    if (referenceParetoFront == null) {
-      throw new JMetalException("The pareto front is null");
-    }
-
-    this.referenceParetoFront = referenceParetoFront ;
+    super(referenceParetoFront) ;
   }
 
   /**
@@ -96,7 +85,7 @@ public class GenerationalDistance<Evaluate extends List<? extends Solution<?>>>
    * @param solutionList
    * @return
    */
-  @Override public Double evaluate(Evaluate solutionList) {
+  @Override public Double evaluate(List<S> solutionList) {
     if (solutionList == null) {
       throw new JMetalException("The pareto front approximation is null") ;
     }
@@ -122,8 +111,11 @@ public class GenerationalDistance<Evaluate extends List<? extends Solution<?>>>
     return sum / front.getNumberOfPoints();
   }
 
-  @Override
-  public String getName() {
-    return super.getName();
+  @Override public String getName() {
+    return "GD" ;
+  }
+
+  @Override public String getDescription() {
+    return "Generational distance quality indicator" ;
   }
 }

@@ -21,15 +21,12 @@
 
 package org.uma.jmetal.qualityindicator.impl;
 
-import org.uma.jmetal.qualityindicator.QualityIndicator;
 import org.uma.jmetal.solution.Solution;
-import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.front.Front;
 import org.uma.jmetal.util.front.imp.ArrayFront;
-import org.uma.jmetal.util.naming.impl.SimpleDescribedEntity;
-import org.uma.jmetal.util.point.impl.LexicographicalPointComparator;
-import org.uma.jmetal.util.point.util.EuclideanDistance;
-import org.uma.jmetal.util.point.util.PointDistance;
+import org.uma.jmetal.util.point.util.comparator.LexicographicalPointComparator;
+import org.uma.jmetal.util.point.util.distance.EuclideanDistance;
+import org.uma.jmetal.util.point.util.distance.PointDistance;
 
 import java.io.FileNotFoundException;
 import java.util.List;
@@ -42,11 +39,13 @@ import java.util.List;
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  * @author Juan J. Durillo
  */
-public class Spread<Evaluate extends List<? extends Solution<?>>>
-    extends SimpleDescribedEntity
-    implements QualityIndicator<Evaluate,Double> {
+public class Spread <S extends Solution<?>> extends GenericIndicator<S> {
 
-  private Front referenceParetoFront ;
+  /**
+   * Default constructor
+   */
+  public Spread() {
+  }
 
   /**
    * Constructor
@@ -55,13 +54,7 @@ public class Spread<Evaluate extends List<? extends Solution<?>>>
    * @throws FileNotFoundException
    */
   public Spread(String referenceParetoFrontFile) throws FileNotFoundException {
-    super("SPREAD", "SPREAD quality indicator") ;
-    if (referenceParetoFrontFile == null) {
-      throw new JMetalException("The pareto front object is null");
-    }
-
-    Front front = new ArrayFront(referenceParetoFrontFile);
-    referenceParetoFront = front ;
+    super(referenceParetoFrontFile) ;
   }
 
   /**
@@ -71,12 +64,7 @@ public class Spread<Evaluate extends List<? extends Solution<?>>>
    * @throws FileNotFoundException
    */
   public Spread(Front referenceParetoFront) {
-    super("SPREAD", "SPREAD quality indicator") ;
-    if (referenceParetoFront == null) {
-      throw new JMetalException("The pareto front is null");
-    }
-
-    this.referenceParetoFront = referenceParetoFront ;
+    super(referenceParetoFront) ;
   }
 
   /**
@@ -84,7 +72,7 @@ public class Spread<Evaluate extends List<? extends Solution<?>>>
    * @param solutionList
    * @return
    */
-  @Override public Double evaluate(Evaluate solutionList) {
+  @Override public Double evaluate(List<S> solutionList) {
     return spread(new ArrayFront(solutionList), referenceParetoFront);
   }
 
@@ -133,6 +121,9 @@ public class Spread<Evaluate extends List<? extends Solution<?>>>
   }
 
   @Override public String getName() {
-    return super.getName() ;
+    return "SPREAD" ;
+  }
+  @Override public String getDescription() {
+    return "Spread quality indicator" ;
   }
 }

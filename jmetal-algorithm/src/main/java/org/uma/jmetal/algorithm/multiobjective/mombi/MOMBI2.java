@@ -1,8 +1,5 @@
 package org.uma.jmetal.algorithm.multiobjective.mombi;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.uma.jmetal.algorithm.multiobjective.mombi.util.*;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
@@ -10,6 +7,9 @@ import org.uma.jmetal.operator.SelectionOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -137,6 +137,13 @@ public class MOMBI2<S extends Solution<?>> extends MOMBI<S> {
 		
 		return result;
 	}
-	
+
+	@Override public String getName() {
+		return "MOMBI" ;
+	}
+
+	@Override public String getDescription() {
+		return "Many-Objective Metaheuristic Based on the R2 Indicator, version 2" ;
+	}
 
 }

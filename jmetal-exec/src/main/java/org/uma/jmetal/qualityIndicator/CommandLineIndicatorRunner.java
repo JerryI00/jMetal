@@ -15,6 +15,7 @@ package org.uma.jmetal.qualityIndicator;
 
 import org.uma.jmetal.qualityindicator.QualityIndicator;
 import org.uma.jmetal.qualityindicator.impl.*;
+import org.uma.jmetal.qualityindicator.impl.hypervolume.PISAHypervolume;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.JMetalLogger;
@@ -90,7 +91,7 @@ public class CommandLineIndicatorRunner {
         + "IGD+ - Inverted generational distance plus \n" + "HV   - Hypervolume \n"
         + "ER   - Error ratio \n" + "SPREAD  - Spread (two objectives)\n"
         + "GSPREAD - Generalized Spread (more than two objectives)\n" + "ER   - Error ratio\n"
-        + "R2   - R2\n\n" + "ALL  - prints all the available indicators \n\n"
+        //+ "R2   - R2\n\n" + "ALL  - prints all the available indicators \n\n"
         + "Normalize can be TRUE or FALSE (the fronts are normalized before computing"
         + " the indicators) \n") ;
   }
@@ -109,9 +110,9 @@ public class CommandLineIndicatorRunner {
     if (normalize) {
       referenceFront = new FrontNormalizer(referenceFront).normalize(referenceFront) ;
       front = new FrontNormalizer(referenceFront).normalize(front) ;
-      System.out.println("The fronts are NORMALIZED before computing the indicators") ;
+      JMetalLogger.logger.info("The fronts are NORMALIZED before computing the indicators"); ;
     } else {
-      System.out.println("The fronts are NOT NORMALIZED before computing the indicators") ;
+      JMetalLogger.logger.info("The fronts are NOT NORMALIZED before computing the indicators") ;
     }
     List<QualityIndicator<List<DoubleSolution>, Double>> indicatorList =
         getAvailableIndicators(referenceFront);
@@ -127,10 +128,10 @@ public class CommandLineIndicatorRunner {
       }
 
       SetCoverage sc = new SetCoverage() ;
-      System.out.println("SC(refPF, front): " + sc.evaluate(
+      JMetalLogger.logger.info("SC(refPF, front): " + sc.evaluate(
           FrontUtils.convertFrontToSolutionList(referenceFront),
           FrontUtils.convertFrontToSolutionList(front))) ;
-      System.out.println("SC(front, refPF): " + sc.evaluate(
+      JMetalLogger.logger.info("SC(front, refPF): " + sc.evaluate(
           FrontUtils.convertFrontToSolutionList(front),
           FrontUtils.convertFrontToSolutionList(referenceFront))) ;
     }
@@ -146,14 +147,14 @@ public class CommandLineIndicatorRunner {
       Front referenceFront) throws FileNotFoundException {
 
     List<QualityIndicator<List<DoubleSolution>, Double>> list = new ArrayList<>() ;
-    list.add(new Epsilon<List<DoubleSolution>>(referenceFront)) ;
-    list.add(new Hypervolume<List<DoubleSolution>>(referenceFront)) ;
-    list.add(new GenerationalDistance<List<DoubleSolution>>(referenceFront)) ;
-    list.add(new InvertedGenerationalDistance<List<DoubleSolution>>(referenceFront)) ;
-    list.add(new InvertedGenerationalDistancePlus<List<DoubleSolution>>(referenceFront)) ;
-    list.add(new Spread<List<DoubleSolution>>(referenceFront)) ;
-    list.add(new GeneralizedSpread<List<DoubleSolution>>(referenceFront)) ;
-    list.add(new R2<List<DoubleSolution>>(referenceFront)) ;
+    list.add(new Epsilon<DoubleSolution>(referenceFront)) ;
+    list.add(new PISAHypervolume<DoubleSolution>(referenceFront)) ;
+    list.add(new GenerationalDistance<DoubleSolution>(referenceFront)) ;
+    list.add(new InvertedGenerationalDistance<DoubleSolution>(referenceFront)) ;
+    list.add(new InvertedGenerationalDistancePlus<DoubleSolution>(referenceFront)) ;
+    list.add(new Spread<DoubleSolution>(referenceFront)) ;
+    list.add(new GeneralizedSpread<DoubleSolution>(referenceFront)) ;
+    //list.add(new R2<List<DoubleSolution>>(referenceFront)) ;
     list.add(new ErrorRatio<List<DoubleSolution>>(referenceFront)) ;
 
     return list ;

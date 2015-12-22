@@ -16,16 +16,11 @@ package org.uma.jmetal.qualityindicator.impl;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.uma.jmetal.problem.impl.AbstractDoubleProblem;
-import org.uma.jmetal.problem.impl.AbstractIntegerProblem;
+import org.uma.jmetal.qualityindicator.impl.hypervolume.PISAHypervolume;
 import org.uma.jmetal.solution.DoubleSolution;
-import org.uma.jmetal.solution.IntegerSolution;
 import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.front.Front;
 import org.uma.jmetal.util.front.imp.ArrayFront;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.hamcrest.CoreMatchers.containsString;
 
@@ -46,17 +41,17 @@ public class HypervolumeTest {
 
     Front front = new ArrayFront(0, 0) ;
 
-    Hypervolume<?> hypervolume = new Hypervolume<List<DoubleSolution>>(front) ;
+    Hypervolume<DoubleSolution> hypervolume = new PISAHypervolume<DoubleSolution>(front) ;
     hypervolume.evaluate(null) ;
   }
 
   @Test
   public void shouldExecuteRaiseAnExceptionIfTheParetoFrontIsNull() {
     exception.expect(JMetalException.class);
-    exception.expectMessage(containsString("The pareto front is null"));
+    exception.expectMessage(containsString("The reference pareto front is null"));
 
     Front front = null ;
 
-    Hypervolume<?> hypervolume = new Hypervolume<List<DoubleSolution>>(front) ;;
+    Hypervolume<?> hypervolume = new PISAHypervolume<DoubleSolution>(front) ;;
   }
 }

@@ -1,8 +1,5 @@
 package org.uma.jmetal.algorithm.multiobjective.mombi;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
@@ -11,6 +8,9 @@ import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Abstract class representing variants of the MOMBI algorithm
@@ -21,7 +21,6 @@ import org.uma.jmetal.util.pseudorandom.JMetalRandom;
  */
 @SuppressWarnings("serial")
 public abstract class AbstractMOMBI<S extends Solution<?>> extends AbstractGeneticAlgorithm<S,List<S>> {
-	private final Problem<S> problem;
 	private final int maxIterations;
 
 	private int iterations = 0;
@@ -44,8 +43,7 @@ public abstract class AbstractMOMBI<S extends Solution<?>> extends AbstractGenet
 											 CrossoverOperator<S> crossover, MutationOperator<S> mutation,
 											 SelectionOperator<List<S>,S> selection,
 											 SolutionListEvaluator<S> evaluator) {
-		super();
-		this.problem = problem;
+		super(problem);
 		this.maxIterations = maxIterations;
 
 		this.crossoverOperator 	= crossover;
@@ -76,18 +74,8 @@ public abstract class AbstractMOMBI<S extends Solution<?>> extends AbstractGenet
 	}
 
 	@Override
-	protected List<S> createInitialPopulation() {
-		List<S> population = new ArrayList<>(this.getPopulationSize());
-		for (int i = 0; i < this.getPopulationSize(); i++) {
-			S newIndividual = problem.createSolution();
-			population.add(newIndividual);
-		}
-		return population;
-	}
-
-	@Override
 	protected List<S> evaluatePopulation(List<S> population) {
-		population = evaluator.evaluate(population, problem);
+		population = evaluator.evaluate(population, getProblem());
 
 		return population;
 	}
@@ -95,7 +83,7 @@ public abstract class AbstractMOMBI<S extends Solution<?>> extends AbstractGenet
 	@Override
 	protected List<S> selection(List<S> population) {
 		List<S> matingPopulation = new ArrayList<>(population.size());
-		for (int i = 0; i < this.getPopulationSize(); i++) {
+		for (int i = 0; i < this.getMaxPopulationSize(); i++) {
 			S solution = selectionOperator.execute(population);
 			matingPopulation.add(solution);
 		}
@@ -105,13 +93,13 @@ public abstract class AbstractMOMBI<S extends Solution<?>> extends AbstractGenet
 
 	@Override
 	protected List<S> reproduction(List<S> population) {
-		List<S> offspringPopulation = new ArrayList<>(this.getPopulationSize());
-		for (int i = 0; i < this.getPopulationSize(); i += 2) {
+		List<S> offspringPopulation = new ArrayList<>(this.getMaxPopulationSize());
+		for (int i = 0; i < this.getMaxPopulationSize(); i += 2) {
 			List<S> parents = new ArrayList<>(2);
-			int parent1Index = JMetalRandom.getInstance().nextInt(0, this.getPopulationSize()-1);
-			int parent2Index = JMetalRandom.getInstance().nextInt(0, this.getPopulationSize()-1);
+			int parent1Index = JMetalRandom.getInstance().nextInt(0, this.getMaxPopulationSize()-1);
+			int parent2Index = JMetalRandom.getInstance().nextInt(0, this.getMaxPopulationSize()-1);
 			while (parent1Index==parent2Index)
-				parent2Index = JMetalRandom.getInstance().nextInt(0, this.getPopulationSize()-1);
+				parent2Index = JMetalRandom.getInstance().nextInt(0, this.getMaxPopulationSize()-1);
 			parents.add(population.get(parent1Index));
 			parents.add(population.get(parent2Index));
 
@@ -128,7 +116,7 @@ public abstract class AbstractMOMBI<S extends Solution<?>> extends AbstractGenet
 
 	@Override
 	public List<S> getResult() {
-		this.setPopulation(evaluator.evaluate(this.getPopulation(), problem));
+		this.setPopulation(evaluator.evaluate(this.getPopulation(), getProblem()));
 
 		return this.getPopulation();
 	}
@@ -156,10 +144,6 @@ public abstract class AbstractMOMBI<S extends Solution<?>> extends AbstractGenet
 
 	public abstract void specificMOEAComputations();
 
-	public Problem<S> getProblem() {
-		return this.problem;
-	}
-
 	public List<Double> getReferencePoint() {
 		return this.referencePoint;
 	}
@@ -174,7 +158,7 @@ public abstract class AbstractMOMBI<S extends Solution<?>> extends AbstractGenet
 	}
 
 	private void initializeNadirPoint(int size) {
-    for (int i = 0; i < size; i++)
+		for (int i = 0; i < size; i++)
 			this.getNadirPoint().add(Double.NEGATIVE_INFINITY);
 	}
 
@@ -198,10 +182,10 @@ public abstract class AbstractMOMBI<S extends Solution<?>> extends AbstractGenet
 			this.updateNadirPoint(solution);
 	}
 
-	protected abstract int getPopulationSize();
+	
 
 	protected boolean populationIsNotFull(List<S> population) {
-		return population.size() < getPopulationSize();
+		return population.size() < getMaxPopulationSize();
 	}
 
 	protected void setReferencePointValue(Double value, int index) {

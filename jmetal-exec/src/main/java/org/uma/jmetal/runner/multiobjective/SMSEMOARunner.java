@@ -29,6 +29,8 @@ import org.uma.jmetal.operator.impl.crossover.SBXCrossover;
 import org.uma.jmetal.operator.impl.mutation.PolynomialMutation;
 import org.uma.jmetal.operator.impl.selection.RandomSelection;
 import org.uma.jmetal.problem.DoubleProblem;
+import org.uma.jmetal.qualityindicator.impl.Hypervolume;
+import org.uma.jmetal.qualityindicator.impl.hypervolume.PISAHypervolume;
 import org.uma.jmetal.runner.AbstractAlgorithmRunner;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.AlgorithmRunner;
@@ -83,14 +85,19 @@ public class SMSEMOARunner extends AbstractAlgorithmRunner {
 
     selection = new RandomSelection<DoubleSolution>();
 
+    Hypervolume<DoubleSolution> hypervolume ;
+    hypervolume = new PISAHypervolume<>() ;
+    hypervolume.setOffset(100.0);
+
     algorithm = new SMSEMOABuilder<DoubleSolution>(problem, crossover, mutation)
-            .setSelectionOperator(selection)
-            .setMaxEvaluations(25000)
-            .setPopulationSize(100)
-            .build() ;
+        .setSelectionOperator(selection)
+        .setMaxEvaluations(25000)
+        .setPopulationSize(100)
+        .setHypervolumeImplementation(hypervolume)
+        .build() ;
 
     AlgorithmRunner algorithmRunner = new AlgorithmRunner.Executor(algorithm)
-            .execute() ;
+        .execute() ;
 
     List<DoubleSolution> population = algorithm.getResult() ;
     long computingTime = algorithmRunner.getComputingTime() ;
