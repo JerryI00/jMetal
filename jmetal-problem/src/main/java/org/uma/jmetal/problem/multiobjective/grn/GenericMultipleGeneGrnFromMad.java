@@ -30,8 +30,8 @@ public abstract class GenericMultipleGeneGrnFromMad extends AbstractDoubleProble
 	protected int modelType=0; // 0 S-System ; 1 Linear System
 	
 	protected double[][] parameterRange;
-	protected double[] rateConstantsRange= {0.0,0.1}; // {0,0.1}; //{0,3}; //
-	protected double[] kineticOrdersRange= {0.0,0.05}; //{0.0,0.05}; //{0,1};//
+	protected double[] rateConstantsRange= {0.3}; // {0,0.1}; //{0,3}; //
+	protected double[] kineticOrdersRange= {0.1}; //{0.0,0.05}; //{0,1};//
 
 	//CONSTRUCTORS
 	/**
