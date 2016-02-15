@@ -76,11 +76,11 @@ public class ANTs16Experiment {
     String experimentBaseDirectory = args[0] ;
 
     List<Problem<DoubleSolution>> problemList = Arrays.<Problem<DoubleSolution>>asList(
-        new ZDT1(), new ZDT2(), new ZDT3(), new ZDT4(), new ZDT6(),
-        new DTLZ1(7, 2), new DTLZ2(12, 2), new DTLZ3(12, 2), new DTLZ4(12, 2), new DTLZ5(12, 2),
+        new ZDT1(), new ZDT2(), new ZDT3(), new ZDT4(), new ZDT6()) ;
+    /*    new DTLZ1(7, 2), new DTLZ2(12, 2), new DTLZ3(12, 2), new DTLZ4(12, 2), new DTLZ5(12, 2),
         new DTLZ6(12,2 ), new DTLZ7(22, 2),
         new WFG1(), new WFG2(), new WFG3(), new WFG4(), new WFG5(),new WFG6(), new WFG7(),
-        new WFG8(), new WFG9()) ;
+        new WFG8(), new WFG9()) ;*/
 
     List<String> referenceFrontFileNames = Arrays.asList(
         "ZDT1.pf", "ZDT2.pf", "ZDT3.pf", "ZDT4.pf", "ZDT6.pf",
@@ -91,7 +91,7 @@ public class ANTs16Experiment {
     List<TaggedAlgorithm<List<DoubleSolution>>> algorithmList = configureAlgorithmList(problemList) ;
 
     Experiment<DoubleSolution, List<DoubleSolution>> experiment =
-        new ExperimentBuilder<DoubleSolution, List<DoubleSolution>>("Ants16")
+        new ExperimentBuilder<DoubleSolution, List<DoubleSolution>>("SMPSO200")
             .setAlgorithmList(algorithmList)
             .setProblemList(problemList)
             .setReferenceFrontDirectory("/pareto_fronts")
@@ -108,7 +108,7 @@ public class ANTs16Experiment {
             .setNumberOfCores(7)
             .build();
 
-    //new ExecuteAlgorithms<>(experiment).run();
+ //   new ExecuteAlgorithms<>(experiment).run();
 
     new ComputeQualityIndicators<>(experiment).run() ;
     new GenerateLatexTablesWithStatistics(experiment).run() ;
@@ -132,10 +132,10 @@ public class ANTs16Experiment {
       double mutationProbability = 1.0 / problemList.get(i).getNumberOfVariables() ;
       double mutationDistributionIndex = 20.0 ;
       Algorithm<List<DoubleSolution>> algorithm = new SMPSOBuilder((DoubleProblem)problemList.get(i),
-          new CrowdingDistanceArchive<DoubleSolution>(100))
+          new CrowdingDistanceArchive<DoubleSolution>(200))
           .setMutation(new PolynomialMutation(mutationProbability, mutationDistributionIndex))
-          .setMaxIterations(250)
-          .setSwarmSize(100)
+          .setMaxIterations(300)
+          .setSwarmSize(200)
           .setSolutionListEvaluator(new SequentialSolutionListEvaluator<DoubleSolution>())
           .build() ;
       algorithms.add(new TaggedAlgorithm<List<DoubleSolution>>(algorithm, problemList.get(i))) ;
@@ -145,15 +145,15 @@ public class ANTs16Experiment {
       double mutationProbability = 1.0 / problemList.get(i).getNumberOfVariables() ;
       double mutationDistributionIndex = 20.0 ;
       Algorithm<List<DoubleSolution>> algorithm = new SMPSOBuilder((DoubleProblem)problemList.get(i),
-          new HypervolumeArchive<DoubleSolution>(100, new WFGHypervolume<DoubleSolution>()))
+          new HypervolumeArchive<DoubleSolution>(200, new WFGHypervolume<DoubleSolution>()))
           .setMutation(new PolynomialMutation(mutationProbability, mutationDistributionIndex))
-          .setMaxIterations(250)
-          .setSwarmSize(100)
+          .setMaxIterations(300)
+          .setSwarmSize(200)
           .setSolutionListEvaluator(new SequentialSolutionListEvaluator<DoubleSolution>())
           .build() ;
       algorithms.add(new TaggedAlgorithm<List<DoubleSolution>>(algorithm, "SMPSOhv", problemList.get(i))) ;
     }
-
+/*
     for (int i = 0 ; i < problemList.size(); i++) {
       double mutationProbability = 1.0 / problemList.get(i).getNumberOfVariables() ;
       double mutationDistributionIndex = 20.0 ;
@@ -185,7 +185,7 @@ public class ANTs16Experiment {
           .build() ;
       algorithms.add(new TaggedAlgorithm<List<DoubleSolution>>(algorithm, "SMPSONa", problemList.get(i))) ;
     }
-
+*/
     return algorithms ;
   }
 }

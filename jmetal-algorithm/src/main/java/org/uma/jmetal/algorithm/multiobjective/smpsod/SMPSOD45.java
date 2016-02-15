@@ -27,6 +27,7 @@ import org.uma.jmetal.util.comparator.DominanceComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.solutionattribute.impl.GenericSolutionAttribute;
+import org.uma.jmetal.algorithm.multiobjective.moead.util.MOEADUtils;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -214,7 +215,7 @@ public class SMPSOD45 extends AbstractParticleSwarmOptimization<DoubleSolution, 
   @Override protected void initializeLeader(List<DoubleSolution> swarm) {
     for (int i = 0; i < swarm.size(); i++) {
       globalBest.add(getSwarm().get(i));
-      updateGlobalBest(i, 2);
+      updateGlobalBest(i, NeighborType.POPULATION);
     }
   }
 
