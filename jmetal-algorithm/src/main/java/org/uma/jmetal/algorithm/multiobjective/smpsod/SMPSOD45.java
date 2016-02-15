@@ -11,11 +11,11 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package org.uma.jmetal.algorithm.multiobjective.smpsod.smpso;
+package org.uma.jmetal.algorithm.multiobjective.smpsod;
 
 import org.uma.jmetal.algorithm.impl.AbstractParticleSwarmOptimization;
-import org.uma.jmetal.algorithm.multiobjective.moead.AbstractMOEAD;
-import org.uma.jmetal.algorithm.multiobjective.moead.MOEAD;
+import org.uma.jmetal.algorithm.multiobjective.moead.AbstractMOEAD.FunctionType;
+import org.uma.jmetal.algorithm.multiobjective.moead.AbstractMOEAD.NeighborType;
 import org.uma.jmetal.algorithm.multiobjective.moead.util.MOEADUtils;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.problem.DoubleProblem;
@@ -27,8 +27,6 @@ import org.uma.jmetal.util.comparator.DominanceComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.solutionattribute.impl.GenericSolutionAttribute;
-import org.uma.jmetal.algorithm.multiobjective.moead.AbstractMOEAD.FunctionType ;
-import org.uma.jmetal.algorithm.multiobjective.moead.AbstractMOEAD.NeighborType ;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -45,7 +43,7 @@ import java.util.StringTokenizer;
  *
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
-public class SMPSOD extends AbstractParticleSwarmOptimization<DoubleSolution, List<DoubleSolution>> {
+public class SMPSOD45 extends AbstractParticleSwarmOptimization<DoubleSolution, List<DoubleSolution>> {
   private DoubleProblem problem;
 
   private double c1Max;
@@ -81,7 +79,7 @@ public class SMPSOD extends AbstractParticleSwarmOptimization<DoubleSolution, Li
   protected List<DoubleSolution> globalBest ;
 
   protected Solution<?>[] indArray;
-  protected AbstractMOEAD.FunctionType functionType;
+  protected FunctionType functionType;
 
   protected String dataDirectory;
 
@@ -103,11 +101,11 @@ public class SMPSOD extends AbstractParticleSwarmOptimization<DoubleSolution, Li
   /**
    * Constructor
    */
-  public SMPSOD(DoubleProblem problem, int swarmSize, BoundedArchive<DoubleSolution> leaders,
-                MutationOperator<DoubleSolution> mutationOperator, int maxIterations, double r1Min, double r1Max,
-                double r2Min, double r2Max, double c1Min, double c1Max, double c2Min, double c2Max,
-                double weightMin, double weightMax, double changeVelocity1, double changeVelocity2,
-                SolutionListEvaluator<DoubleSolution> evaluator) {
+  public SMPSOD45(DoubleProblem problem, int swarmSize, BoundedArchive<DoubleSolution> leaders,
+                  MutationOperator<DoubleSolution> mutationOperator, int maxIterations, double r1Min, double r1Max,
+                  double r2Min, double r2Max, double c1Min, double c1Max, double c2Min, double c2Max,
+                  double weightMin, double weightMax, double changeVelocity1, double changeVelocity2,
+                  SolutionListEvaluator<DoubleSolution> evaluator) {
     this.problem = problem;
     this.swarmSize = swarmSize;
     this.leaders = leaders;
@@ -153,6 +151,35 @@ public class SMPSOD extends AbstractParticleSwarmOptimization<DoubleSolution, Li
     initializeNeighborhood();
     initializeIdealPoint();
   }
+
+  @Override public void run() {
+    setSwarm(createInitialSwarm());
+    evaluateSwarm(getSwarm()) ;
+    initializeVelocity(getSwarm());
+    initializeParticlesMemory(getSwarm());
+    initializeLeader(getSwarm());
+
+    initProgress();
+    while (!isStoppingConditionReached()) {
+      updateVelocity(getSwarm());
+      updatePosition(getSwarm());
+
+      for (int i = 0; i < problem.getNumberOfVariables(); i++) {
+        NeighborType type ;
+        if (JMetalRandom.getInstance().nextDouble() < neighborhoodSelectionProbability) {
+          type = NeighborType.NEIGHBOR ;
+        } else {
+          type = NeighborType.POPULATION ;
+        }
+
+        updateLocalBest(getSwarm().get(i), i, NeighborType.NEIGHBOR);
+        updateGlobalBest(i, NeighborType.POPULATION);
+      }
+
+      updateProgress();
+    }
+  }
+
 
   @Override protected void initProgress() {
     iterations = 1;
@@ -213,7 +240,7 @@ public class SMPSOD extends AbstractParticleSwarmOptimization<DoubleSolution, Li
     for (int i = 0; i < swarm.size(); i++) {
       DoubleSolution particle = (DoubleSolution) swarm.get(i).copy();
       DoubleSolution bestParticle = (DoubleSolution) localBest.get(i).copy() ;
-      bestGlobal = (DoubleSolution) globalBest.get(i).copy() ;();
+      bestGlobal = (DoubleSolution) globalBest.get(i).copy() ;
 
       r1 = randomGenerator.nextDouble(r1Min, r1Max);
       r2 = randomGenerator.nextDouble(r2Min, r2Max);
@@ -405,7 +432,7 @@ public class SMPSOD extends AbstractParticleSwarmOptimization<DoubleSolution, Li
    * @param subproblemId the id of current subproblem
    * @param neighbourType neighbour type
    */
-  protected List<Integer> matingSelection(int subproblemId, int numberOfSolutionsToSelect, AbstractMOEAD.NeighborType neighbourType) {
+  protected List<Integer> matingSelection(int subproblemId, int numberOfSolutionsToSelect, NeighborType neighbourType) {
     int neighbourSize;
     int selectedSolution;
 
@@ -414,7 +441,7 @@ public class SMPSOD extends AbstractParticleSwarmOptimization<DoubleSolution, Li
     neighbourSize = neighborhood[subproblemId].length;
     while (listOfSolutions.size() < numberOfSolutionsToSelect) {
       int random;
-      if (neighbourType == AbstractMOEAD.NeighborType.NEIGHBOR) {
+      if (neighbourType == NeighborType.NEIGHBOR) {
         random = randomGenerator.nextInt(0, neighbourSize - 1);
         selectedSolution = neighborhood[subproblemId][random];
       } else {
@@ -444,13 +471,13 @@ public class SMPSOD extends AbstractParticleSwarmOptimization<DoubleSolution, Li
    * @throws JMetalException
    */
   @SuppressWarnings("unchecked")
-  protected  void updateLocalBest(DoubleSolution individual, int subProblemId, AbstractMOEAD.NeighborType neighborType) throws JMetalException {
+  protected  void updateLocalBest(DoubleSolution individual, int subProblemId, NeighborType neighborType) throws JMetalException {
     int size;
     int time;
 
     time = 0;
 
-    if (neighborType == AbstractMOEAD.NeighborType.NEIGHBOR) {
+    if (neighborType == NeighborType.NEIGHBOR) {
       size = neighborhood[subProblemId].length;
     } else {
       size = getSwarm().size();
@@ -461,7 +488,7 @@ public class SMPSOD extends AbstractParticleSwarmOptimization<DoubleSolution, Li
 
     for (int i = 0; i < size; i++) {
       int k;
-      if (neighborType == AbstractMOEAD.NeighborType.NEIGHBOR) {
+      if (neighborType == NeighborType.NEIGHBOR) {
         k = neighborhood[subProblemId][perm[i]];
       } else {
         k = perm[i];
@@ -485,7 +512,7 @@ public class SMPSOD extends AbstractParticleSwarmOptimization<DoubleSolution, Li
   double fitnessFunction(DoubleSolution individual, double[] lambda) throws JMetalException {
     double fitness;
 
-    if (MOEAD.FunctionType.TCHE.equals(functionType)) {
+    if (FunctionType.TCHE.equals(functionType)) {
       double maxFun = -1.0e+30;
 
       for (int n = 0; n < problem.getNumberOfObjectives(); n++) {
@@ -503,7 +530,7 @@ public class SMPSOD extends AbstractParticleSwarmOptimization<DoubleSolution, Li
       }
 
       fitness = maxFun;
-    } else if (MOEAD.FunctionType.AGG.equals(functionType)) {
+    } else if (FunctionType.AGG.equals(functionType)) {
       double sum = 0.0;
       for (int n = 0; n < problem.getNumberOfObjectives(); n++) {
         sum += (lambda[n]) * individual.getObjective(n);
@@ -511,7 +538,7 @@ public class SMPSOD extends AbstractParticleSwarmOptimization<DoubleSolution, Li
 
       fitness = sum;
 
-    } else if (MOEAD.FunctionType.PBI.equals(functionType)) {
+    } else if (FunctionType.PBI.equals(functionType)) {
       double d1, d2, nl;
       double theta = 5.0;
 
@@ -578,10 +605,10 @@ public class SMPSOD extends AbstractParticleSwarmOptimization<DoubleSolution, Li
     }
   }
 
-  void updateGlobalBest(int particleIndex, int type) {
+  void updateGlobalBest(int particleIndex, NeighborType type) {
     double gBestFitness ;
     gBestFitness = fitnessFunction(globalBest.get(particleIndex), lambda[particleIndex]) ;
-    if (type == 1) {
+    if (type == NeighborType.NEIGHBOR) {
       for (int i = 0 ; i < neighborhood[i].length; i++) {
         double v1 = fitnessFunction(getSwarm().get(neighborhood[particleIndex][i]), lambda[particleIndex]) ;
         double v2 = gBestFitness ;

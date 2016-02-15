@@ -27,10 +27,15 @@ import org.uma.jmetal.problem.multiobjective.zdt.*;
 import org.uma.jmetal.qualityindicator.impl.*;
 import org.uma.jmetal.qualityindicator.impl.hypervolume.PISAHypervolume;
 import org.uma.jmetal.qualityindicator.impl.hypervolume.WFGHypervolume;
+import org.uma.jmetal.referencePoint.ReferencePoint;
+import org.uma.jmetal.referencePoint.impl.IdealPoint;
+import org.uma.jmetal.referencePoint.impl.NadirPoint;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.JMetalException;
+import org.uma.jmetal.util.archive.BoundedArchive;
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive;
 import org.uma.jmetal.util.archive.impl.HypervolumeArchive;
+import org.uma.jmetal.util.cosinedistance.CosineDistanceArchive;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 import org.uma.jmetal.util.experiment.Experiment;
 import org.uma.jmetal.util.experiment.ExperimentBuilder;
@@ -103,14 +108,14 @@ public class ANTs16Experiment {
             .setNumberOfCores(7)
             .build();
 
-    new ExecuteAlgorithms<>(experiment).run();
-    /*
+    //new ExecuteAlgorithms<>(experiment).run();
+
     new ComputeQualityIndicators<>(experiment).run() ;
     new GenerateLatexTablesWithStatistics(experiment).run() ;
     new GenerateWilcoxonTestTablesWithR<>(experiment).run() ;
     new GenerateFriedmanTestTables<>(experiment).run();
     new GenerateBoxplotsWithR<>(experiment).setRows(3).setColumns(3).setDisplayNotch().run() ;
-    */
+
   }
 
   /**
@@ -147,6 +152,38 @@ public class ANTs16Experiment {
           .setSolutionListEvaluator(new SequentialSolutionListEvaluator<DoubleSolution>())
           .build() ;
       algorithms.add(new TaggedAlgorithm<List<DoubleSolution>>(algorithm, "SMPSOhv", problemList.get(i))) ;
+    }
+
+    for (int i = 0 ; i < problemList.size(); i++) {
+      double mutationProbability = 1.0 / problemList.get(i).getNumberOfVariables() ;
+      double mutationDistributionIndex = 20.0 ;
+      ReferencePoint referencePoint = new IdealPoint(problemList.get(i).getNumberOfObjectives()) ;
+      BoundedArchive<DoubleSolution> archive = new CosineDistanceArchive<>(100, referencePoint) ;
+
+      Algorithm<List<DoubleSolution>> algorithm = new SMPSOBuilder((DoubleProblem)problemList.get(i),
+          archive)
+          .setMutation(new PolynomialMutation(mutationProbability, mutationDistributionIndex))
+          .setMaxIterations(250)
+          .setSwarmSize(100)
+          .setSolutionListEvaluator(new SequentialSolutionListEvaluator<DoubleSolution>())
+          .build() ;
+      algorithms.add(new TaggedAlgorithm<List<DoubleSolution>>(algorithm, "SMPSOId", problemList.get(i))) ;
+    }
+
+    for (int i = 0 ; i < problemList.size(); i++) {
+      double mutationProbability = 1.0 / problemList.get(i).getNumberOfVariables() ;
+      double mutationDistributionIndex = 20.0 ;
+      ReferencePoint referencePoint = new NadirPoint(problemList.get(i).getNumberOfObjectives()) ;
+      BoundedArchive<DoubleSolution> archive = new CosineDistanceArchive<>(100, referencePoint) ;
+
+      Algorithm<List<DoubleSolution>> algorithm = new SMPSOBuilder((DoubleProblem)problemList.get(i),
+          archive)
+          .setMutation(new PolynomialMutation(mutationProbability, mutationDistributionIndex))
+          .setMaxIterations(250)
+          .setSwarmSize(100)
+          .setSolutionListEvaluator(new SequentialSolutionListEvaluator<DoubleSolution>())
+          .build() ;
+      algorithms.add(new TaggedAlgorithm<List<DoubleSolution>>(algorithm, "SMPSONa", problemList.get(i))) ;
     }
 
     return algorithms ;
