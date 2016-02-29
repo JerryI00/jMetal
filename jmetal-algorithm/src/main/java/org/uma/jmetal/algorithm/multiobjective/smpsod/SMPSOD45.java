@@ -306,23 +306,6 @@ public class SMPSOD45 extends AbstractParticleSwarmOptimization<DoubleSolution, 
     return leaders.getSolutionList();
   }
 
-  protected DoubleSolution selectGlobalBest() {
-    DoubleSolution one, two;
-    DoubleSolution bestGlobal;
-    int pos1 = randomGenerator.nextInt(0, leaders.getSolutionList().size() - 1);
-    int pos2 = randomGenerator.nextInt(0, leaders.getSolutionList().size() - 1);
-    one = leaders.getSolutionList().get(pos1);
-    two = leaders.getSolutionList().get(pos2);
-
-    if (leaders.getComparator().compare(one, two) < 1) {
-      bestGlobal = (DoubleSolution) one.copy();
-    } else {
-      bestGlobal = (DoubleSolution) two.copy();
-    }
-
-    return bestGlobal;
-  }
-
   private double velocityConstriction(double v, double[] deltaMax, double[] deltaMin,
                                       int variableIndex) {
 
@@ -402,66 +385,6 @@ public class SMPSOD45 extends AbstractParticleSwarmOptimization<DoubleSolution, 
         idealPoint[n] = individual.getObjective(n);
       }
     }
-  }
-
-  protected NeighborType chooseNeighborType() {
-    double rnd = randomGenerator.nextDouble();
-    NeighborType neighborType ;
-
-    if (rnd < neighborhoodSelectionProbability) {
-      neighborType = NeighborType.NEIGHBOR;
-    } else {
-      neighborType = NeighborType.POPULATION;
-    }
-    return neighborType ;
-  }
-
-  protected List<DoubleSolution> parentSelection(int subProblemId, NeighborType neighborType) {
-    List<Integer> matingPool = matingSelection(subProblemId, 2, neighborType);
-
-    List<DoubleSolution> parents = new ArrayList<>(3);
-
-    parents.add(getSwarm().get(matingPool.get(0)));
-    parents.add(getSwarm().get(matingPool.get(1)));
-    parents.add(getSwarm().get(subProblemId));
-
-    return parents ;
-  }
-
-  /**
-   *
-   * @param subproblemId the id of current subproblem
-   * @param neighbourType neighbour type
-   */
-  protected List<Integer> matingSelection(int subproblemId, int numberOfSolutionsToSelect, NeighborType neighbourType) {
-    int neighbourSize;
-    int selectedSolution;
-
-    List<Integer> listOfSolutions = new ArrayList<>(numberOfSolutionsToSelect) ;
-
-    neighbourSize = neighborhood[subproblemId].length;
-    while (listOfSolutions.size() < numberOfSolutionsToSelect) {
-      int random;
-      if (neighbourType == NeighborType.NEIGHBOR) {
-        random = randomGenerator.nextInt(0, neighbourSize - 1);
-        selectedSolution = neighborhood[subproblemId][random];
-      } else {
-        selectedSolution = randomGenerator.nextInt(0, swarmSize - 1);
-      }
-      boolean flag = true;
-      for (Integer individualId : listOfSolutions) {
-        if (individualId == selectedSolution) {
-          flag = false;
-          break;
-        }
-      }
-
-      if (flag) {
-        listOfSolutions.add(selectedSolution);
-      }
-    }
-
-    return listOfSolutions ;
   }
 
   /**
